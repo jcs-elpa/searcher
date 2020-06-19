@@ -6,7 +6,7 @@
 ;; Author: Shen, Jen-Chieh <jcs090218@gmail.com>
 ;; Description: Searcher in pure elisp
 ;; Keyword: search searcher project file text string
-;; Version: 0.0.1
+;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24.3") (dash "2.10") (f "0.20.0"))
 ;; URL: https://github.com/jcs-elpa/searcher
 
@@ -42,24 +42,29 @@
   :group 'tool
   :link '(url-link :tag "Repository" "https://github.com/jcs-elpa/searcher"))
 
-(defcustom searcher-ignore-dirs '(".log"
-                                  "[Bb]in"
-                                  "[Bb]uild"
-                                  "node_modules"
-                                  "res"
-                                  ".vs"
-                                  ".vscode")
+(defcustom searcher-ignore-dirs
+  '(".log"
+    "[Bb]in"
+    "[Bb]uild"
+    "node_modules"
+    "res"
+    ".vs"
+    ".vscode")
   "List of path you want to ignore by the searcher."
   :type 'list
   :group 'searcher)
 
-(defcustom searcher-ignore-files '("[.]gitignore"
-                                   "[.]gitattributes"
-                                   "[.]meta"
-                                   "[.]img" "[.]png"
-                                   "[.]iso"
-                                   "[.]wav"
-                                   "[.]exe")
+(defcustom searcher-ignore-files
+  '("[.]gitignore" "[.]gitattributes"
+    "[.]meta" "[.]iso"
+    "[.]img" "[.]png" "[.]jpg" "[.]jpng" "[.]gif"
+    "[.]psd"
+    "[.]obj" "[.]maya" "[.]fbx"
+    "[.]mp3" "[.]wav"
+    "[.]mp4"  "[.]avi" "[.]flv" "[.]mov" "[.]webm" "[.]mpg" "[.]mkv" "[.]wmv"
+    "[.]exe" "[.]bin"
+    "[.]elc" "[.]javac" "[.]pyc"
+    "[.]lib" "[.]dll" "[.]o" "[.]a")
   "List of files you want to ignore by the searcher."
   :type 'list
   :group 'searcher)
@@ -95,25 +100,50 @@
     (dolist (dir dirs) (push (f-files dir fn) files))
     (-flatten (reverse files))))
 
+(defun searcher--form-match (file pos ln-str)
+  "Form a match candidate. Data are FILE, POS and LN-STR."
+  (list :file file :position pos :string ln-str))
+
 ;;;###autoload
-(defun searcher-search-project (str-or-regex)
+(defun searcher-search-in-project (str-or-regex)
   "Search STR-OR-REGEX from the root of project directory."
   (let ((project-path (cdr (project-current))))
     (if project-path
-        (searcher-search project-path str-or-regex)
-      (user-error "[WARNING] No project root folder found from default path"))))
+        (searcher-search-in-path project-path str-or-regex)
+      (error "[ERROR] No project root folder found from default path"))))
 
 ;;;###autoload
-(defun searcher-search (path str-or-regex)
+(defun searcher-search-in-path (path str-or-regex)
   "Search STR-OR-REGEX from PATH."
   (let* ((ignore-lst searcher-ignore-files)
          (files (searcher--f-files-ignore-directories
                  path
                  (lambda (file)  ; Filter it.
                    (not (searcher--is-contain-list-string-regexp ignore-lst file)))
-                 t)))
-    (message "files: %s" files)
-    ))
+                 t))
+         (result '()))
+    (dolist (file files)
+      (push (searcher-search-in-file file str-or-regex) result))
+    (-flatten-n 1 result)))
+
+;;;###autoload
+(defun searcher-search-in-file (file str-or-regex)
+  "Search STR-OR-REGEX in FILE."
+  (let ((matchs '()) (match "") (ln-str "")
+        (buf-str "") (start 0))
+    (unless (string-empty-p str-or-regex)
+      (with-temp-buffer
+        (insert-file-contents file)
+        (setq buf-str (buffer-string))
+        (while start
+          (setq start (string-match str-or-regex buf-str start))
+          (when start
+            (goto-char start)
+            (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position))))
+            (setq match (searcher--form-match file start ln-str))
+            (push match matchs)
+            (setq start (1+ start))))))
+    matchs))
 
 (provide 'searcher)
 ;;; searcher.el ends here
