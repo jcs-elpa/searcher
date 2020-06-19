@@ -133,7 +133,9 @@
         (buf-str "") (start 0))
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
-        (insert-file-contents file)
+        (if (file-exists-p file)
+            (insert-file-contents file)
+          (insert (with-current-buffer file (buffer-string))))
         (setq buf-str (buffer-string))
         (while start
           (setq start (string-match str-or-regex buf-str start))
