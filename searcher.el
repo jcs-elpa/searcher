@@ -7,7 +7,7 @@
 ;; Description: Searcher in pure elisp
 ;; Keyword: search searcher project file text string
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24.3") (dash "2.10") (f "0.20.0"))
+;; Package-Requires: ((emacs "25.1") (dash "2.10") (f "0.20.0"))
 ;; URL: https://github.com/jcs-elpa/searcher
 
 ;; This file is NOT part of GNU Emacs.
@@ -101,7 +101,7 @@
     (-flatten (reverse files))))
 
 (defun searcher--form-match (file pos ln-str)
-  "Form a match candidate. Data are FILE, POS and LN-STR."
+  "Form a match candidate; data are FILE, POS and LN-STR."
   (list :file file :position pos :string ln-str))
 
 ;;;###autoload
