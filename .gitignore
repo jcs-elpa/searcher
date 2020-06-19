@@ -1,0 +1,9 @@
+# ignore these directories.
+/.git
+/recipes
+/test
+searcher-pkg.el
+searcher-autoloads.el
+
+# ignore generated files.
+*.elc
