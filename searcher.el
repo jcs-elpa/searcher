@@ -35,6 +35,8 @@
 (require 'cl-lib)
 (require 'dash)
 (require 'f)
+(require 'subr-x)
+(require 'grep)
 
 (defgroup searcher nil
   "Searcher in pure elisp."
