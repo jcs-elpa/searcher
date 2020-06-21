@@ -102,9 +102,9 @@
     (dolist (dir dirs) (push (f-files dir fn) files))
     (-flatten (reverse files))))
 
-(defun searcher--form-match (file pos ln-str)
+(defun searcher--form-match (file ln-str pos ln col)
   "Form a match candidate; data are FILE, POS and LN-STR."
-  (list :file file :position pos :string ln-str))
+  (list :file file :string ln-str :position pos :line-number ln :column col))
 
 ;;;###autoload
 (defun searcher-search-in-project (str-or-regex)
@@ -131,7 +131,7 @@
 ;;;###autoload
 (defun searcher-search-in-file (file str-or-regex)
   "Search STR-OR-REGEX in FILE."
-  (let ((matchs '()) (match "") (ln-str "")
+  (let ((matchs '()) (match "") (ln-str "") (ln nil) (col nil)
         (buf-str "") (start 0))
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
@@ -143,8 +143,11 @@
           (setq start (string-match str-or-regex buf-str start))
           (when start
             (goto-char start)
-            (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position))))
-            (setq match (searcher--form-match file start ln-str))
+            (progn
+              (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position))))
+              (setq ln (line-number-at-pos))
+              (setq col (current-column)))
+            (setq match (searcher--form-match file ln-str start ln col))
             (push match matchs)
             (setq start (1+ start))))))
     matchs))
