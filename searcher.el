@@ -147,8 +147,12 @@
               (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position))))
               (setq ln (line-number-at-pos))
               (setq col (current-column)))
-            (setq match (searcher--form-match file ln-str start ln col))
-            (push match matchs)
+            (when (and (not (string-empty-p ln-str))
+                       ;; TODO: Not sure why `string-match-p' doesn't give the
+                       ;; correct result when checking the end of the string.
+                       (not (<= (length ln-str) col)))
+              (setq match (searcher--form-match file ln-str start ln col))
+              (push match matchs))
             (setq start (1+ start))))))
     matchs))
 
