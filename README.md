@@ -4,8 +4,7 @@
 # searcher
 > Searcher in pure elisp
 
-Similar to [silver search (ag)](https://github.com/ggreer/the_silver_searcher) 
-but written in pure elisp.
+Similar to `ag`/`rg`/`grep`, etc. But written in pure elisp.
 
 ## Contribution
 
