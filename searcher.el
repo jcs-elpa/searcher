@@ -45,13 +45,13 @@
   :link '(url-link :tag "Repository" "https://github.com/jcs-elpa/searcher"))
 
 (defcustom searcher-ignore-dirs
-  '(".log"
+  '("[.]log"
     "[Bb]in"
     "[Bb]uild"
     "node_modules"
     "res"
-    ".vs"
-    ".vscode")
+    "[.]vs"
+    "[.]vscode")
   "List of path you want to ignore by the searcher."
   :type 'list
   :group 'searcher)
