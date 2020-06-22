@@ -73,7 +73,7 @@
 
 (defun searcher--is-contain-list-string-regexp (in-list in-str)
   "Check if IN-STR contain in any string in the IN-LIST."
-  (cl-some #'(lambda (lb-sub-str) (string-match-p lb-sub-str in-str)) in-list))
+  (cl-some (lambda (lb-sub-str) (string-match-p lb-sub-str in-str)) in-list))
 
 (defun searcher--f-directories-ignore-directories (path &optional rec)
   "Find all directories in PATH by ignored common directories with FN and REC."
@@ -143,10 +143,9 @@
           (setq start (string-match str-or-regex buf-str start))
           (when start
             (goto-char start)
-            (progn
-              (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position))))
-              (setq ln (line-number-at-pos))
-              (setq col (current-column)))
+            (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position)))
+                  ln (line-number-at-pos)
+                  col (current-column))
             (when (and (not (string-empty-p ln-str))
                        ;; TODO: Not sure why `string-match-p' doesn't give the
                        ;; correct result when checking the end of the string.
