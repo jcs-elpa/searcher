@@ -45,13 +45,13 @@
   :link '(url-link :tag "Repository" "https://github.com/jcs-elpa/searcher"))
 
 (defcustom searcher-ignore-dirs
-  '("[.]log"
-    "[Bb]in"
-    "[Bb]uild"
-    "node_modules"
-    "res"
-    "[.]vs"
-    "[.]vscode")
+  '("[.]log/"
+    "[Bb]in/"
+    "[Bb]uild/"
+    "node_modules/"
+    "res/"
+    "[.]vs/"
+    "[.]vscode/")
   "List of path you want to ignore by the searcher."
   :type 'list
   :group 'searcher)
@@ -86,7 +86,7 @@
                                 projectile-globally-ignored-directories
                               '()))))
     (dolist (dir dirs)
-      (unless (searcher--is-contain-list-string-regexp ignore-lst dir)
+      (unless (searcher--is-contain-list-string-regexp ignore-lst (f-slash dir))
         (push dir valid-dirs)))
     (when rec
       (dolist (dir valid-dirs)
