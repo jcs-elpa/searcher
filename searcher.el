@@ -81,12 +81,9 @@
 
 (defun searcher--f-directories-ignore-directories (path &optional rec)
   "Find all directories in PATH by ignored common directories with FN and REC."
-  (let ((dirs (f-directories path))
-        (valid-dirs '())
-        (final-dirs '())
-        (ignore-lst searcher-ignore-dirs))
+  (let ((dirs (f-directories path)) (valid-dirs '()) (final-dirs '()))
     (dolist (dir dirs)
-      (unless (searcher--is-contain-list-string-regexp ignore-lst (f-slash dir))
+      (unless (searcher--is-contain-list-string-regexp searcher-ignore-dirs (f-slash dir))
         (push dir valid-dirs)))
     (when rec
       (dolist (dir valid-dirs)
