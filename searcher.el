@@ -36,7 +36,6 @@
 (require 'dash)
 (require 'f)
 (require 'subr-x)
-(require 'grep)
 
 (defgroup searcher nil
   "Searcher in pure elisp."
@@ -46,12 +45,17 @@
 
 (defcustom searcher-ignore-dirs
   '("/[.]log/"
-    "/[Bb]in/"
-    "/[Bb]uild/"
-    "/node_modules/"
-    "/res/"
-    "/[.]vs/"
-    "/[.]vscode/")
+    "/[.]vs/" "/[.]vscode/"
+    "/[.]svn/" "/[.]git/" "/[.]hg/" "/[.]bzr/"
+    "/[.]idea/"
+    "/[.]tox/"
+    "/[.]stack-work/"
+    "/[.]ccls-cache/" "/[.]clangd/"
+    "/[.]ensime_cache/" "/[.]eunit/" "/[.]fslckout/"
+    "/[Bb]in/" "/[Bb]uild/" "/res/" "/[.]src/"
+    "/SCCS/" "/RCS/" "/CVS/" "/MCVS/" "/_MTN/" "/_FOSSIL_/"
+    "/_darcs/" "/{arch}/"
+    "/node_modules/")
   "List of path you want to ignore by the searcher."
   :type 'list
   :group 'searcher)
@@ -80,11 +84,7 @@
   (let ((dirs (f-directories path))
         (valid-dirs '())
         (final-dirs '())
-        (ignore-lst (append searcher-ignore-dirs
-                            grep-find-ignored-directories
-                            (if (boundp 'projectile-globally-ignored-directories)
-                                projectile-globally-ignored-directories
-                              '()))))
+        (ignore-lst searcher-ignore-dirs))
     (dolist (dir dirs)
       (unless (searcher--is-contain-list-string-regexp ignore-lst (f-slash dir))
         (push dir valid-dirs)))
