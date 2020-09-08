@@ -75,6 +75,17 @@
   :type 'list
   :group 'searcher)
 
+(defcustom searcher-use-cache t
+  "Use cache to speed up the search speed."
+  :type 'boolean
+  :group 'searcher)
+
+(defvar searcher--cache-project-files nil
+  "Cache for valid project files.
+Do `searcher-clean-cache' if project tree strucutre has been changed.")
+
+;;; Util
+
 (defun searcher--is-contain-list-string-regexp (in-list in-str)
   "Check if IN-STR contain in any string in the IN-LIST."
   (cl-some (lambda (lb-sub-str) (string-match-p lb-sub-str in-str)) in-list))
@@ -99,9 +110,15 @@
     (dolist (dir dirs) (push (f-files dir fn) files))
     (-flatten (reverse files))))
 
+;;; Core
+
 (defun searcher--form-match (file ln-str pos ln col)
   "Form a match candidate; data are FILE, POS and LN-STR."
   (list :file file :string ln-str :position pos :line-number ln :column col))
+
+(defun searcher-clean-cache ()
+  "Clean up the cache files."
+  (setq searcher--cache-project-files nil))
 
 ;;;###autoload
 (defun searcher-search-in-project (str-or-regex)
@@ -114,14 +131,16 @@
 ;;;###autoload
 (defun searcher-search-in-path (path str-or-regex)
   "Search STR-OR-REGEX from PATH."
-  (let* ((ignore-lst searcher-ignore-files)
-         (files (searcher--f-files-ignore-directories
-                 path
-                 (lambda (file)  ; Filter it.
-                   (not (searcher--is-contain-list-string-regexp ignore-lst file)))
-                 t))
-         (result '()))
-    (dolist (file files)
+  (let ((result '()))
+    (when (or (not searcher--cache-project-files)
+              (not searcher-use-cache))
+      (setq searcher--cache-project-files
+            (searcher--f-files-ignore-directories
+             path
+             (lambda (file)  ; Filter it.
+               (not (searcher--is-contain-list-string-regexp searcher-ignore-files file)))
+             t)))
+    (dolist (file searcher--cache-project-files)
       (push (searcher-search-in-file file str-or-regex) result))
     (-flatten-n 1 result)))
 
