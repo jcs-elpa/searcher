@@ -156,7 +156,7 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
           (insert (with-current-buffer file (buffer-string))))
         (setq buf-str (buffer-string))
         (while start
-          (setq start (string-match str-or-regex buf-str start))
+          (setq start (ignore-errors (string-match str-or-regex buf-str start)))
           (when start
             (goto-char start)
             (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position)))
