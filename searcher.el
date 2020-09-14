@@ -147,8 +147,8 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 ;;;###autoload
 (defun searcher-search-in-file (file str-or-regex)
   "Search STR-OR-REGEX in FILE."
-  (let ((matchs '()) (match "") (ln-str "") (ln nil) (col nil)
-        (buf-str "") (start 0))
+  (let ((matchs '()) (match "") (ln-str "") (ln 1) (col nil)
+        (buf-str "") (start 0) (ln-pt 1) delta-ln)
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
         (if (file-exists-p file)
@@ -160,8 +160,10 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
           (when start
             (goto-char start)
             (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position)))
-                  ln (line-number-at-pos)
                   col (current-column))
+            (setq delta-ln (1- (count-lines ln-pt start))  ; Calculate lines.
+                  ln (+ ln delta-ln)
+                  ln-pt start)
             (when (and (not (string-empty-p ln-str))
                        ;; TODO: Not sure why `string-match-p' doesn't give the
                        ;; correct result when checking the end of the string.
