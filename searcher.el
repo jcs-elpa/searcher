@@ -80,6 +80,16 @@
   :type 'boolean
   :group 'searcher)
 
+(defcustom searcher-raise-gc-threshold-p t
+  "Raise `gc-cons-threshold' while searching."
+  :type 'boolean
+  :group 'searcher)
+
+(defcustom searcher-gc-threshold (* 1024 1024 128)
+  "GC threshold while searching."
+  :type 'integer
+  :group 'searcher)
+
 (defvar searcher--cache-project-files nil
   "Cache for valid project files.
 Do `searcher-clean-cache' if project tree strucutre has been changed.")
@@ -110,6 +120,10 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
     (dolist (dir dirs) (push (f-files dir fn) files))
     (-flatten (reverse files))))
 
+(defun searcher--get-gc-threshold ()
+  "Return the prefer GC threshold."
+  (if searcher-raise-gc-threshold-p searcher-gc-threshold gc-cons-threshold))
+
 ;;; Core
 
 (defun searcher--form-match (file ln-str pos ln col)
@@ -123,7 +137,8 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 ;;;###autoload
 (defun searcher-search-in-project (str-or-regex)
   "Search STR-OR-REGEX from the root of project directory."
-  (let ((project-path (cdr (project-current))))
+  (let ((gc-cons-threshold (searcher--get-gc-threshold))
+        (project-path (cdr (project-current))))
     (if project-path
         (searcher-search-in-path project-path str-or-regex)
       (error "[ERROR] No project root folder found from default path"))))
@@ -131,7 +146,8 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 ;;;###autoload
 (defun searcher-search-in-path (path str-or-regex)
   "Search STR-OR-REGEX from PATH."
-  (let ((result '()))
+  (let ((gc-cons-threshold (searcher--get-gc-threshold))
+        (result '()))
     (when (or (not searcher--cache-project-files)
               (not searcher-use-cache))
       (setq searcher--cache-project-files
@@ -147,7 +163,8 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 ;;;###autoload
 (defun searcher-search-in-file (file str-or-regex)
   "Search STR-OR-REGEX in FILE."
-  (let ((matchs '()) (match "") (ln-str "") (ln 1) (col nil)
+  (let ((gc-cons-threshold (searcher--get-gc-threshold))
+        (matchs '()) (match "") (ln-str "") (ln 1) (col nil)
         (buf-str "") (start 0) (ln-pt 1) delta-ln)
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
