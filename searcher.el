@@ -162,7 +162,9 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
             (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position)))
                   col (current-column))
             (setq delta-ln (1- (count-lines ln-pt start))  ; Calculate lines.
-                  ln (+ ln delta-ln)
+                  ;; Function `count-lines' missing 1 if column is at 0, so we
+                  ;; add 1 back to line if column is 0.
+                  ln (+ ln delta-ln (if (= col 0) 1 0))
                   ln-pt start)
             (when (and (not (string-empty-p ln-str))
                        ;; TODO: Not sure why `string-match-p' doesn't give the
