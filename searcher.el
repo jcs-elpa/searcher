@@ -112,9 +112,9 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 
 ;;; Core
 
-(defun searcher--form-match (file ln-str pos ln col)
-  "Form a match candidate; data are FILE, POS and LN-STR."
-  (list :file file :string ln-str :position pos :line-number ln :column col))
+(defun searcher--form-match (file ln-str start end ln col)
+  "Form a match candidate; data are FILE, START, END and LN-STR."
+  (list :file file :string ln-str :start start :end end :line-number ln :column col))
 
 (defun searcher-clean-cache ()
   "Clean up the cache files."
@@ -148,7 +148,7 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 (defun searcher-search-in-file (file str-or-regex)
   "Search STR-OR-REGEX in FILE."
   (let ((matchs '()) (match "") (ln-str "") (ln 1) (col nil)
-        (buf-str "") (start 0) (ln-pt 1) delta-ln)
+        (buf-str "") (start 0) end (ln-pt 1) delta-ln)
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
         (if (file-exists-p file)
@@ -158,7 +158,7 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
         (while start
           (setq start (ignore-errors (string-match str-or-regex buf-str start)))
           (when start
-            (setq start (1+ start))
+            (setq start (1+ start) end (1+ (match-end 0)))
             (goto-char start)
             (setq ln-str (substring buf-str (1- (line-beginning-position)) (1- (line-end-position)))
                   col (current-column))
@@ -167,7 +167,7 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
                   ;; add 1 back to line if column is 0.
                   ln (+ ln delta-ln (if (= col 0) 1 0))
                   ln-pt start)
-            (setq match (searcher--form-match file ln-str start ln col))
+            (setq match (searcher--form-match file ln-str start end ln col))
             (push match matchs)
             (setq start (1+ start))))))
     matchs))
