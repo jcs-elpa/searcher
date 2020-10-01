@@ -8,6 +8,18 @@
 
 Similar to `ag`, `rg`, `grep`, etc. But written in pure elisp.
 
+## Searching Algorithm
+
+You can change the search type by tweaking the variable `searcher-search-type`
+to one of the following value.
+
+* `regex` - Use normal regular expression by default.
+* `flx` - Fuzzy searching yet it takes more performance. (You would need to
+install [flx](https://github.com/lewang/flx))
+
+If you think the fuzzy is too fuzzy and not perform accuracy. Try to raise/lower
+`searcher-flx-threshold` value depends on the scoring you want.
+
 ## Contribution
 
 If you would like to contribute to this project, you may either
