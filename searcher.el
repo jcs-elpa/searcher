@@ -129,7 +129,7 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
   "Return string at line with current cursor position."
   (substring (buffer-string) (1- (line-beginning-position)) (1- (line-end-position))))
 
-(defun searcher--form-fuzzy-regex (str-or-regex)
+(defun searcher--form-fuzzy-regex-flx (str-or-regex)
   "Convert STR-OR-REGEX to fuzzy regular expression."
   (format "\\_<[%s][^ \t\n\r\f]*\\_>" str-or-regex))
 
@@ -147,7 +147,7 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
   "Return search string depends on `searcher-search-type' and STR-OR-REGEX."
   (cl-case searcher-search-type
     (regex str-or-regex)
-    (flx (searcher--form-fuzzy-regex str-or-regex))))
+    (flx (searcher--form-fuzzy-regex-flx str-or-regex))))
 
 (defun searcher--init ()
   "Initialize searcher."
@@ -202,14 +202,15 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
                 ;; add 1 back to line if column is 0.
                 ln (+ ln delta-ln (if (= col 0) 1 0))
                 ln-pt start)
-          (cl-case searcher-search-type
-            (regex (setq push-it t))
-            (flx
-             (let* ((match-str (substring (buffer-string) (1- start) (1- end)))
-                    (score-data (flx-score match-str real-regex))
-                    (score (if score-data (nth 0 score-data) nil))
-                    (good-score-p (if score (< searcher-flx-threshold score) nil)))
-               (when good-score-p (setq push-it t)))))
+          (setq push-it
+                (cl-case searcher-search-type
+                  (regex t)
+                  (flx
+                   (let* ((match-str (substring (buffer-string) (1- start) (1- end)))
+                          (score-data (flx-score match-str real-regex))
+                          (score (if score-data (nth 0 score-data) nil))
+                          (good-score-p (if score (< searcher-flx-threshold score) nil)))
+                     good-score-p))))
           ;; Push if good.
           (when push-it
             (push (searcher--form-match file (searcher--line-string)
