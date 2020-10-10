@@ -83,6 +83,7 @@
 (defcustom searcher-search-type 'regex
   "Type of the searching algorithm."
   :type '(choice (const :tag "regex" regex)
+                 (const :tag "regex-fuzzy" regex-fuzzy)
                  (const :tag "flx" flx))
   :group 'searcher)
 
@@ -129,9 +130,33 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
   "Return string at line with current cursor position."
   (substring (buffer-string) (1- (line-beginning-position)) (1- (line-end-position))))
 
+;;; Fuzzy
+
 (defun searcher--form-fuzzy-regex-flx (str-or-regex)
   "Convert STR-OR-REGEX to fuzzy regular expression."
   (format "\\_<[%s][^ \t\n\r\f]*\\_>" str-or-regex))
+
+(defun searcher--trim-trailing-re (regex)
+  "Trim incomplete REGEX.
+If REGEX ends with \\|, trim it, since then it matches an empty string."
+  (if (string-match "\\`\\(.*\\)[\\]|\\'" regex) (match-string 1 regex) regex))
+
+(defun searcher--regex-fuzzy (str)
+  "Build a regex sequence from STR.
+Insert .* between each char."
+  (setq str (searcher--trim-trailing-re str))
+  (if (string-match "\\`\\(\\^?\\)\\(.*?\\)\\(\\$?\\)\\'" str)
+      (concat (match-string 1 str)
+              (let ((lst (string-to-list (match-string 2 str))))
+                (apply #'concat
+                       (cl-mapcar
+                        #'concat
+                        (cons "" (cdr (mapcar (lambda (c) (format "[^%c\n]*" c))
+                                              lst)))
+                        (mapcar (lambda (x) (format "\\(%s\\)" (regexp-quote (char-to-string x))))
+                                lst))))
+              (match-string 3 str))
+    str))
 
 ;;; Core
 
@@ -146,13 +171,13 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 (defun searcher--search-string (str-or-regex)
   "Return search string depends on `searcher-search-type' and STR-OR-REGEX."
   (cl-case searcher-search-type
-    (regex str-or-regex)
-    (flx (searcher--form-fuzzy-regex-flx str-or-regex))))
+    (regex-fuzzy (searcher--regex-fuzzy str-or-regex))
+    (flx (searcher--form-fuzzy-regex-flx str-or-regex))
+    (t str-or-regex)))
 
 (defun searcher--init ()
   "Initialize searcher."
   (cl-case searcher-search-type
-    (regex )
     (flx (require 'flx))))
 
 ;;;###autoload
@@ -204,13 +229,13 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
                 ln-pt start)
           (setq push-it
                 (cl-case searcher-search-type
-                  (regex t)
                   (flx
                    (let* ((match-str (substring (buffer-string) (1- start) (1- end)))
                           (score-data (flx-score match-str real-regex))
                           (score (if score-data (nth 0 score-data) nil))
                           (good-score-p (if score (< searcher-flx-threshold score) nil)))
-                     good-score-p))))
+                     good-score-p))
+                  (t t)))
           ;; Push if good.
           (when push-it
             (push (searcher--form-match file (searcher--line-string)
