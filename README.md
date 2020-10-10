@@ -15,8 +15,9 @@ to one of the following value.
 
 * `regex` - Use normal regular expression by default.
 * `regex-fuzzy` - Fuzzy regular expression from [ivy--regex-fuzzy](https://github.com/abo-abo/swiper/blob/b65e401c22ec56a008b00f651cd9536caf593d43/ivy.el#L2906).
-* `flx` - Fuzzy searching yet it takes more performance. (You would need to
-install [flx](https://github.com/lewang/flx))
+* `flx` - Fuzzy searching the same as `regex-fuzzy` and uses [flx](https://github.com/lewang/flx)
+to score the candidates.
+(You would need to install [flx](https://github.com/lewang/flx))
 
 If you think the fuzzy is too fuzzy and not perform accuracy. Try to raise/lower
 `searcher-flx-threshold` value depends on the scoring you want.
