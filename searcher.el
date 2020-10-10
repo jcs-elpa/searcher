@@ -212,9 +212,8 @@ Argument FUZZY-REGEX is regular expression for fuzzy matching."
 (defun searcher-search-in-file (file str-or-regex)
   "Search STR-OR-REGEX in FILE."
   (searcher--init)
-  (let ((matches '()) (ln-str "") (ln 1) col
-        (ln-pt 1) delta-ln
-        (search-cons t) start end
+  (let ((matches '()) (ln 1) col
+        (ln-pt 1) delta-ln start end
         (fuzzy-regex (searcher--search-string str-or-regex)))
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
