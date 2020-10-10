@@ -212,31 +212,29 @@ Argument FUZZY-REGEX is regular expression for fuzzy matching."
 (defun searcher-search-in-file (file str-or-regex)
   "Search STR-OR-REGEX in FILE."
   (searcher--init)
-  (let ((matchs '()) (match "") (ln-str "") (ln 1) (col nil)
+  (let ((matches '()) (ln-str "") (ln 1) col
         (ln-pt 1) delta-ln
-        (search-cons t) start (end 0)
+        (search-cons t) start end
         (fuzzy-regex (searcher--search-string str-or-regex)))
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
         (if (file-exists-p file)
             (insert-file-contents file)
           (insert (with-current-buffer file (buffer-string))))
-        (while search-cons
-          (setq search-cons (searcher--search-cons str-or-regex end fuzzy-regex))
-          (when search-cons
-            (setq start (car search-cons) end (cdr search-cons))
-            (goto-char start)
-            (setq ln-str (searcher--line-string)
-                  col (current-column))
-            (setq delta-ln (1- (count-lines ln-pt start))  ; Calculate lines.
-                  ;; Function `count-lines' missing 1 if column is at 0, so we
-                  ;; add 1 back to line if column is 0.
-                  ln (+ ln delta-ln (if (= col 0) 1 0))
-                  ln-pt start)
-            (setq match (searcher--form-match file ln-str start end ln col))
-            (push match matchs)
-            (setq end (1+ end))))))
-    matchs))
+        (goto-char (point-min))
+        (while (search-forward-regexp str-or-regex nil t)
+          (setq start (match-beginning 0) end (match-end 0))
+          (setq col (save-excursion (goto-char start) (current-column))
+                delta-ln (1- (count-lines ln-pt start))  ; Calculate lines.
+                ;; Function `count-lines' missing 1 if column is at 0, so we
+                ;; add 1 back to line if column is 0.
+                ln (+ ln delta-ln (if (= col 0) 1 0))
+                ln-pt start)
+          (push (searcher--form-match file
+                                      (searcher--line-string)
+                                      start end ln col)
+                matches))))
+    matches))
 
 (provide 'searcher)
 ;;; searcher.el ends here
