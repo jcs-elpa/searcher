@@ -132,10 +132,6 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 
 ;;; Fuzzy
 
-(defun searcher--form-fuzzy-regex-flx (str-or-regex)
-  "Convert STR-OR-REGEX to fuzzy regular expression."
-  (format "\\_<[%s][^ \t\n\r\f]*\\_>" str-or-regex))
-
 (defun searcher--trim-trailing-re (regex)
   "Trim incomplete REGEX.
 If REGEX ends with \\|, trim it, since then it matches an empty string."
@@ -170,15 +166,15 @@ Insert .* between each char."
 
 (defun searcher--search-string (str-or-regex)
   "Return search string depends on `searcher-search-type' and STR-OR-REGEX."
-  (cl-case searcher-search-type
-    (regex-fuzzy (searcher--regex-fuzzy str-or-regex))
-    (flx (searcher--form-fuzzy-regex-flx str-or-regex))
-    (t str-or-regex)))
+  (cond ((or (eq searcher-search-type 'regex-fuzzy)
+             (eq searcher-search-type 'flx))
+         (searcher--regex-fuzzy str-or-regex))
+        (t str-or-regex)))
 
 (defun searcher--init ()
   "Initialize searcher."
-  (cl-case searcher-search-type
-    (flx (require 'flx))))
+  (cond ((eq searcher-search-type 'flx)
+         (require 'flx))))
 
 ;;;###autoload
 (defun searcher-search-in-project (str-or-regex)
@@ -228,14 +224,13 @@ Insert .* between each char."
                 ln (+ ln delta-ln (if (= col 0) 1 0))
                 ln-pt start)
           (setq push-it
-                (cl-case searcher-search-type
-                  (flx
-                   (let* ((match-str (substring (buffer-string) (1- start) (1- end)))
-                          (score-data (flx-score match-str real-regex))
-                          (score (if score-data (nth 0 score-data) nil))
-                          (good-score-p (if score (< searcher-flx-threshold score) nil)))
-                     good-score-p))
-                  (t t)))
+                (cond ((eq searcher-search-type 'flx)
+                       (let* ((match-str (substring (buffer-string) (1- start) (1- end)))
+                              (score-data (flx-score match-str real-regex))
+                              (score (if score-data (nth 0 score-data) nil))
+                              (good-score-p (if score (< searcher-flx-threshold score) nil)))
+                         good-score-p))
+                      (t t)))
           ;; Push if good.
           (when push-it
             (push (searcher--form-match file (searcher--line-string)
