@@ -146,8 +146,8 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
 (defun searcher--search-string (str-or-regex)
   "Return search string depends on `searcher-search-type' and STR-OR-REGEX."
   (cl-case searcher-search-type
-    ('regex str-or-regex)
-    ('flx (searcher--form-fuzzy-regex str-or-regex))))
+    (regex str-or-regex)
+    (flx (searcher--form-fuzzy-regex str-or-regex))))
 
 (defun searcher--search-cons (str-or-regex start-pt fuzzy-regex)
   "Return cons that form by (start point, end point).
@@ -158,10 +158,10 @@ Argument FUZZY-REGEX is regular expression for fuzzy matching."
   (let ((buf-str (buffer-string)) start end
         match-str score-data score good-score-p break-it)
     (cl-case searcher-search-type
-      ('regex
+      (regex
        (setq start (ignore-errors (string-match str-or-regex buf-str start-pt)))
        (when start (setq start (1+ start) end (1+ (match-end 0)))))
-      ('flx
+      (flx
        (while (not break-it)
          (setq start (ignore-errors (string-match fuzzy-regex buf-str start-pt)))
          (if (not start)
@@ -181,8 +181,8 @@ Argument FUZZY-REGEX is regular expression for fuzzy matching."
 (defun searcher--init ()
   "Initialize searcher."
   (cl-case searcher-search-type
-    ('regex )
-    ('flx (require 'flx))))
+    (regex )
+    (flx (require 'flx))))
 
 ;;;###autoload
 (defun searcher-search-in-project (str-or-regex)
