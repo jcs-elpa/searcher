@@ -14,6 +14,7 @@ You can change the search type by tweaking the variable `searcher-search-type`
 to one of the following value.
 
 * `regex` - Use normal regular expression by default.
+* `regex-fuzzy` - Fuzzy regular expression from `ivy--regex-fuzzy`.
 * `flx` - Fuzzy searching yet it takes more performance. (You would need to
 install [flx](https://github.com/lewang/flx))
 
