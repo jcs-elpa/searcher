@@ -149,35 +149,6 @@ Do `searcher-clean-cache' if project tree strucutre has been changed.")
     (regex str-or-regex)
     (flx (searcher--form-fuzzy-regex str-or-regex))))
 
-(defun searcher--search-cons (str-or-regex start-pt fuzzy-regex)
-  "Return cons that form by (start point, end point).
-
-Argument STR-OR-REGEX is the input of search string.
-Argument START-PT is the starting search point.
-Argument FUZZY-REGEX is regular expression for fuzzy matching."
-  (let ((buf-str (buffer-string)) start end
-        match-str score-data score good-score-p break-it)
-    (cl-case searcher-search-type
-      (regex
-       (setq start (ignore-errors (string-match str-or-regex buf-str start-pt)))
-       (when start (setq start (1+ start) end (1+ (match-end 0)))))
-      (flx
-       (while (not break-it)
-         (setq start (ignore-errors (string-match fuzzy-regex buf-str start-pt)))
-         (if (not start)
-             (setq break-it t)
-           (setq end (match-end 0)
-                 match-str (substring buf-str start end)
-                 score-data (flx-score match-str str-or-regex)
-                 score (if score-data (nth 0 score-data) nil)
-                 good-score-p (if score (< searcher-flx-threshold score) nil))
-           (if good-score-p
-               (progn
-                 (setq start (1+ start) end (1+ end))
-                 (setq break-it t))
-             (setq start-pt (1+ start)))))))
-    (if (and start end) (cons start end) nil)))
-
 (defun searcher--init ()
   "Initialize searcher."
   (cl-case searcher-search-type
@@ -212,16 +183,18 @@ Argument FUZZY-REGEX is regular expression for fuzzy matching."
 (defun searcher-search-in-file (file str-or-regex)
   "Search STR-OR-REGEX in FILE."
   (searcher--init)
-  (let ((matches '()) (ln 1) col
-        (ln-pt 1) delta-ln start end
-        (fuzzy-regex (searcher--search-string str-or-regex)))
+  (let ((matches '()) (ln 1) col (ln-pt 1) delta-ln start end push-it
+        (real-regex str-or-regex))
+    (setq str-or-regex (searcher--search-string str-or-regex))
     (unless (string-empty-p str-or-regex)
       (with-temp-buffer
         (if (file-exists-p file)
             (insert-file-contents file)
           (insert (with-current-buffer file (buffer-string))))
         (goto-char (point-min))
-        (while (search-forward-regexp str-or-regex nil t)
+        ;; NOTE: We still need `ignore-errors' because it doesn't handle
+        ;; invalid regular expression issue!
+        (while (ignore-errors (search-forward-regexp str-or-regex nil t))
           (setq start (match-beginning 0) end (match-end 0))
           (setq col (save-excursion (goto-char start) (current-column))
                 delta-ln (1- (count-lines ln-pt start))  ; Calculate lines.
@@ -229,10 +202,20 @@ Argument FUZZY-REGEX is regular expression for fuzzy matching."
                 ;; add 1 back to line if column is 0.
                 ln (+ ln delta-ln (if (= col 0) 1 0))
                 ln-pt start)
-          (push (searcher--form-match file
-                                      (searcher--line-string)
-                                      start end ln col)
-                matches))))
+          (cl-case searcher-search-type
+            (regex (setq push-it t))
+            (flx
+             (let* ((match-str (substring (buffer-string) (1- start) (1- end)))
+                    (score-data (flx-score match-str real-regex))
+                    (score (if score-data (nth 0 score-data) nil))
+                    (good-score-p (if score (< searcher-flx-threshold score) nil)))
+               (when good-score-p (setq push-it t)))))
+          ;; Push if good.
+          (when push-it
+            (push (searcher--form-match file (searcher--line-string)
+                                        start end ln col)
+                  matches)
+            (setq push-it nil)))))
     matches))
 
 (provide 'searcher)
