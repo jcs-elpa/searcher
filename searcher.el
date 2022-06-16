@@ -4,11 +4,10 @@
 ;; Created date 2020-06-19 20:12:01
 
 ;; Author: Shen, Jen-Chieh <jcs090218@gmail.com>
-;; Description: Searcher in pure elisp
-;; Keyword: search searcher project file text string
+;; URL: https://github.com/jcs-elpa/searcher
 ;; Version: 0.4.1
 ;; Package-Requires: ((emacs "25.1") (dash "2.10") (f "0.20.0"))
-;; URL: https://github.com/jcs-elpa/searcher
+;; Keywords: search searcher project file text string
 
 ;; This file is NOT part of GNU Emacs.
 

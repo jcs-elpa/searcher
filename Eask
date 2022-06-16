@@ -1,6 +1,13 @@
-(source "melpa")
+(package "searcher"
+         "0.4.1"
+         "Searcher in pure elisp")
+
+(website-url "https://github.com/jcs-elpa/searcher")
+(keywords "search" "searcher" "project" "file" "text" "string")
 
 (package-file "searcher.el")
+
+(source "melpa")
 
 (setq network-security-level 'low      ; see https://github.com/jcs090218/setup-emacs-windows/issues/156#issuecomment-932956432
       byte-compile-error-on-warn nil)
