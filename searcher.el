@@ -7,7 +7,7 @@
 ;; URL: https://github.com/jcs-elpa/searcher
 ;; Version: 0.4.1
 ;; Package-Requires: ((emacs "25.1") (dash "2.10") (f "0.20.0"))
-;; Keywords: search searcher project file text string
+;; Keywords: convenience search searcher project file text string
 
 ;; This file is NOT part of GNU Emacs.
 
