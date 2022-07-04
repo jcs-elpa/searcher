@@ -3,7 +3,7 @@
          "Searcher in pure elisp")
 
 (website-url "https://github.com/jcs-elpa/searcher")
-(keywords "search" "searcher" "project" "file" "text" "string")
+(keywords "convenience" "search" "searcher" "string")
 
 (package-file "searcher.el")
 
