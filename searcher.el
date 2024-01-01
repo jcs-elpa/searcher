@@ -1,6 +1,6 @@
 ;;; searcher.el --- Searcher in pure elisp  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2020-2021  Shen, Jen-Chieh
+;; Copyright (C) 2020-2024  Shen, Jen-Chieh
 ;; Created date 2020-06-19 20:12:01
 
 ;; Author: Shen, Jen-Chieh <jcs090218@gmail.com>
