@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "searcher"
          "0.4.1"
          "Searcher in pure elisp")
