@@ -11,8 +11,8 @@ Similar to `ag`, `rg`, `grep`, etc. But written in pure elisp.
 
 ## ❓Why?
 
-While tools like `grep`, `rg`, and `ag` are fast and powerful, they require external binaries to be installed and available on your system.  
-`searcher` is implemented entirely in Emacs Lisp, so it works out-of-the-box on any system where Emacs runs — no extra dependencies, no platform-specific quirks.  
+While tools like `grep`, `rg`, and `ag` are fast and powerful, they require external binaries to be installed and available on your system.
+`searcher` is implemented entirely in Emacs Lisp, so it works out-of-the-box on any system where Emacs runs — no extra dependencies, no platform-specific quirks.
 This makes it particularly convenient for users in environments where installing additional tools is difficult or restricted, or for those who prefer an Emacs-only workflow.
 
 ## 💡 Searching Algorithm
